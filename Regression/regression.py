@@ -3,6 +3,7 @@ import numpy
 
 data_points = 10000
 data_dim = 6
+batch_size = 64
 
 s = tensorflow.Session()
 
@@ -29,11 +30,18 @@ train = opt.minimize(loss_func)
 init = tensorflow.global_variables_initializer()
 s.run(init)
 
-for ep in range(100):
-    batch_idx = numpy.random.choice(len(x), size=64)
-    batch_x = numpy.array(x[batch_idx])
-    batch_y = numpy.array(y[batch_idx])
+# Shuffle
+sh = numpy.arange(data_points)
+numpy.random.shuffle(sh)
 
-    s.run(train, feed_dict={x_in: batch_x, y_in: batch_y})
+for epoch in range(100):
+    i = 0
+    while i < data_points - batch_size - 1:
+        batch_idx = sh[i:i+batch_size]
+        batch_x = numpy.array(x[batch_idx])
+        batch_y = numpy.array(y[batch_idx])
+
+        s.run(train, feed_dict={x_in: batch_x, y_in: batch_y})
+        i += batch_size
     print("W", s.run(W))
     print("b", s.run(b))
